@@ -1,0 +1,128 @@
+body{
+    background:#07142a;
+    color:white;
+    font-family:'Poppins',sans-serif;
+}
+
+.container{
+    max-width:1200px;
+    margin:auto;
+    padding:20px;
+}
+
+.hero{
+    text-align:center;
+    margin-bottom:25px;
+}
+
+.hero h1{
+    font-size:2.2rem;
+}
+
+.hero p{
+    opacity:.8;
+}
+
+.stats-grid{
+    display:grid;
+    grid-template-columns:
+    repeat(auto-fit,minmax(160px,1fr));
+    gap:15px;
+    margin-bottom:25px;
+}
+
+.stat-card{
+    background:#12213d;
+    padding:20px;
+    border-radius:20px;
+    text-align:center;
+}
+
+.stat-card h2{
+    color:#22c55e;
+    margin-top:10px;
+}
+
+.glass{
+    background:#12213d;
+    border-radius:20px;
+    padding:20px;
+    margin-bottom:20px;
+}
+
+.ring-box{
+    text-align:center;
+}
+
+#searchInput{
+    width:100%;
+    padding:15px;
+    border:none;
+    border-radius:12px;
+    background:#1a2b4c;
+    color:white;
+    font-size:16px;
+}
+
+#memberCards{
+    display:grid;
+    grid-template-columns:
+    repeat(auto-fit,minmax(280px,1fr));
+    gap:20px;
+}
+
+.member-card{
+    background:#12213d;
+    border-radius:20px;
+    padding:20px;
+}
+
+.member-name{
+    font-size:20px;
+    font-weight:600;
+    margin-bottom:10px;
+}
+
+.member-row{
+    display:flex;
+    justify-content:space-between;
+    margin-bottom:10px;
+}
+
+.progress-bar{
+    height:10px;
+    background:#334155;
+    border-radius:20px;
+    overflow:hidden;
+}
+
+.progress-fill{
+    height:100%;
+}
+
+.green{
+    background:#22c55e;
+}
+
+.yellow{
+    background:#eab308;
+}
+
+.red{
+    background:#ef4444;
+}
+
+@media(max-width:768px){
+
+    .hero h1{
+        font-size:1.7rem;
+    }
+
+    .stat-card{
+        padding:15px;
+    }
+
+    .member-card{
+        padding:15px;
+    }
+}
