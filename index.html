@@ -1,113 +1,107 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-
-<title>Goa Trip Saving Dashboard</title>
-
-<link rel="stylesheet" href="css/style.css">
-
-<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Goa Trip Saving 🏖️</title>
+<meta name="description" content="Crew saving tracker for our Goa trip — sunsets, beach shacks & unforgettable nights." />
+<link rel="stylesheet" href="styles.css" />
 </head>
-
 <body>
+  <!-- Floating ambient emojis -->
+  <div class="ambient" aria-hidden="true">
+    <span class="emoji float-slow" style="left:8%;top:12%;font-size:3rem;opacity:.25">🌴</span>
+    <span class="emoji float" style="right:10%;top:18%;font-size:2.5rem;opacity:.3">☀️</span>
+    <span class="emoji float" style="left:15%;top:55%;font-size:2.5rem;opacity:.2">🐚</span>
+    <span class="emoji float-slow" style="right:8%;top:60%;font-size:3rem;opacity:.25">🥥</span>
+    <span class="emoji wave" style="left:50%;top:8%;font-size:2rem;opacity:.3">🕊️</span>
+    <span class="emoji float" style="right:25%;bottom:10%;font-size:2.5rem;opacity:.25">🍹</span>
+  </div>
 
-<div class="container">
+  <main class="container">
+    <!-- Hero -->
+    <header class="hero pop-in">
+      <div class="chip">
+        <span class="wave">🌊</span><span>Crew Trip Tracker</span><span class="wave">🌴</span>
+      </div>
+      <h1 class="title">
+        <span class="g-sunset">Goa</span> Trip <span class="float inline">🏖️</span>
+      </h1>
+      <p class="subtitle">Saving together for sunsets, beach shacks, and unforgettable nights.</p>
+      <div class="chip mt">
+        🎯 <span class="muted">Goal</span>
+        <strong class="g-ocean" id="goalChip">₹1,11,000</strong>
+      </div>
+    </header>
 
-    <div class="hero">
+    <!-- Stats -->
+    <section class="stats" id="stats"></section>
 
-        <h1>🏖️ Trip Saving</h1>
-
-        <p>
-            Goal ₹111,000
-        </p>
-
-    </div>
-
-    <div class="stats-grid">
-
-        <div class="stat-card">
-            <span>Total Saved</span>
-            <h2 id="savedAmount">₹0</h2>
+    <!-- Progress + Top -->
+    <section class="split">
+      <div class="card glow progress-card">
+        <div class="bg-emoji">🏝️</div>
+        <h3 class="kicker">Goal Progress</h3>
+        <p class="small">Sail to <span class="g-sunset bold">Goa</span> 🌅</p>
+        <div class="ring-wrap">
+          <svg width="220" height="220" viewBox="0 0 220 220" class="ring">
+            <defs>
+              <linearGradient id="ringGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+                <stop offset="0%" stop-color="#36d6e5"/>
+                <stop offset="50%" stop-color="#f7a83a"/>
+                <stop offset="100%" stop-color="#ff6b4a"/>
+              </linearGradient>
+            </defs>
+            <circle cx="110" cy="110" r="90" fill="none" stroke="rgba(120,170,210,.25)" stroke-width="14"/>
+            <circle id="ringFill" cx="110" cy="110" r="90" fill="none" stroke="url(#ringGrad)" stroke-width="14" stroke-linecap="round" stroke-dasharray="565.48" stroke-dashoffset="565.48"/>
+          </svg>
+          <div class="ring-center">
+            <span class="float" style="font-size:2.25rem">🏖️</span>
+            <span class="pct g-sunset" id="ringPct">0%</span>
+            <span class="tiny muted">complete</span>
+          </div>
         </div>
-
-        <div class="stat-card">
-            <span>Progress</span>
-            <h2 id="progressPercent">0%</h2>
+        <div class="row pill">
+          <div><div class="tiny muted">Saved</div><div class="bold primary" id="savedPill">₹0</div></div>
+          <span style="font-size:1.5rem">→</span>
+          <div style="text-align:right"><div class="tiny muted">Goal</div><div class="bold accent" id="goalPill">₹0</div></div>
         </div>
+      </div>
 
-        <div class="stat-card">
-            <span>Remaining</span>
-            <h2 id="remainingAmount">₹0</h2>
+      <div class="card top-card">
+        <div class="bg-emoji">🏆</div>
+        <div class="row gap">
+          <span class="float" style="font-size:1.5rem">🏆</span>
+          <h3 style="margin:0">Top Contributors</h3>
         </div>
+        <ol id="topList" class="top-list"></ol>
+      </div>
+    </section>
 
-        <div class="stat-card">
-            <span>Members</span>
-            <h2 id="memberCount">0</h2>
+    <!-- Members -->
+    <section class="members">
+      <!-- Monthly Collection -->
+      <div class="monthly-wrap">
+        <div class="members-head">
+          <h2><span class="g-ocean">Monthly</span> Collection <span class="float inline">📅</span></h2>
+          <span class="tiny muted" id="monthlyMeta"></span>
         </div>
+        <div class="monthly-summary" id="monthlySummary"></div>
+        <div class="monthly-grid" id="monthlyGrid"></div>
+      </div>
 
-    </div>
+      <div class="members-head">
+        <h2><span>The </span><span class="g-ocean">Crew</span> <span class="wave inline">🧳</span></h2>
+        <span class="tiny muted" id="crewMeta"></span>
+      </div>
+      <div class="grid" id="membersGrid"></div>
+    </section>
 
-    <div class="glass ring-box">
+    <footer class="footer">
+      Made with <span class="coral">♥</span> for the Goa crew · Total target <span id="totalTarget"></span>
+    </footer>
+  </main>
 
-        <h2>Goal Progress</h2>
-
-        <div class="ring-container">
-
-            <canvas id="goalChart"></canvas>
-
-            <div class="ring-text">
-                <span id="centerAmount">₹0</span>
-            </div>
-
-        </div>
-
-    </div>
-
-    <div class="glass">
-
-        <h2>Monthly Collection</h2>
-
-        <canvas id="monthlyChart"></canvas>
-
-    </div>
-
-    <div class="glass">
-
-        <h2>Contribution Distribution</h2>
-
-        <canvas id="memberChart"></canvas>
-
-    </div>
-
-    <div class="glass">
-
-        <h2>🏆 Top Contributors</h2>
-
-        <div id="leaderboard"></div>
-
-    </div>
-
-    <div class="glass">
-
-        <input
-            type="text"
-            id="searchInput"
-            placeholder="🔍 Search Member"
-        >
-
-    </div>
-
-    <div id="memberCards"></div>
-
-</div>
-
-<script src="js/app.js"></script>
-
+  <script src="script.js"></script>
 </body>
 </html>
