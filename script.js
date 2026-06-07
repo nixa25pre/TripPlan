@@ -1,13 +1,13 @@
 // ====== CONFIG ======
 const CSV_URL = "https://docs.google.com/spreadsheets/d/1EELxeBDFyC_Xye3tYct_YvVELuph6AbgFZ9y_vWt_ww/export?format=csv";
-const GOAL_AMOUNT = 111000;
 const PER_MEMBER_TARGET = 12000;
 const MONTHS = ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
 const MONTH_EMOJI = ["❄️","💝","🌸","🌷","🌻","☀️","🏖️","🌊","🍂","🎃","🪔","🎄"];
 
 const EMOJI_MAP = {
   "Arulanand":"🌴","Edward":"🏝️","Nixan":"🌊","Kithiyon":"🥥","Jacques":"🍹",
-  "Joseph":"🐚","Fredrik":"⛱️","Shaja":"🌺","Santhosh":"🦀","Raj":"🐠"
+  "Joseph":"🐚","Fredrik":"⛱️","Shaja":"🌺","Santhosh":"🦀","Raj":"🐠",
+  "Praveen":"🌅","Allwin":"🦜"
 };
 const FALLBACK_EMOJIS = ["🌴","🏝️","🌊","🥥","🍹","🐚","⛱️","🌺","🦀","🐠","🌅","🦜"];
 const emojiFor = (name, i) => EMOJI_MAP[name] || FALLBACK_EMOJIS[i % FALLBACK_EMOJIS.length];
@@ -17,14 +17,18 @@ const fmt = (n) => "₹" + Number(n||0).toLocaleString("en-IN");
 fetch(CSV_URL)
   .then(r => r.text())
   .then(csv => {
-    const rows = csv.split("\n");
+    const rows = csv.split("\n").map(r => r.replace(/\r/g, ""));
     const members = [];
     const monthlyTotals = new Array(12).fill(0);
-    for (let i = 1; i < 11; i++) {
-      if (!rows[i]) continue;
-      const cols = rows[i].replace(/\r/g, "").split(",");
-      const name = cols[0]?.trim();
+
+    // Start at row 1 (skip header), stop on blank/summary rows
+    for (let i = 1; i < rows.length; i++) {
+      const cols = rows[i].split(",");
+      const name = (cols[0] || "").trim();
       if (!name) continue;
+      // Stop when reaching totals/summary rows
+      if (/^total/i.test(name) || /^overall/i.test(name)) break;
+
       const monthly = [];
       for (let m = 0; m < 12; m++) {
         const v = Number(cols[2 + m]) || 0;
@@ -32,7 +36,7 @@ fetch(CSV_URL)
         monthlyTotals[m] += v;
       }
       const paid = Number(cols[14]) || monthly.reduce((s,v)=>s+v,0);
-      members.push({ name, paid, target: PER_MEMBER_TARGET, emoji: emojiFor(name, i-1), monthly });
+      members.push({ name, paid, target: PER_MEMBER_TARGET, emoji: emojiFor(name, members.length), monthly });
     }
     render(members, monthlyTotals);
   })
@@ -45,7 +49,8 @@ fetch(CSV_URL)
 function render(members, monthlyTotals) {
   const totalPaid = members.reduce((s,m)=>s+m.paid,0);
   const totalTarget = members.reduce((s,m)=>s+m.target,0);
-  const progress = (totalPaid/GOAL_AMOUNT)*100;
+  const GOAL_AMOUNT = totalTarget; // dynamic: crew size × per-member target
+  const progress = GOAL_AMOUNT ? (totalPaid/GOAL_AMOUNT)*100 : 0;
   const remaining = Math.max(0, GOAL_AMOUNT - totalPaid);
 
   document.getElementById("goalChip").textContent = fmt(GOAL_AMOUNT);
@@ -88,12 +93,12 @@ function render(members, monthlyTotals) {
 
   // ====== MONTHLY COLLECTION ======
   const maxMonth = Math.max(1, ...monthlyTotals);
-  const monthlyExpected = members.length * 1000; // share per month
+  const monthlyExpected = members.length * 1000;
   document.getElementById("monthlyMeta").textContent =
     `Target ${fmt(monthlyExpected)}/month · 12 months`;
 
   document.getElementById("monthlyGrid").innerHTML = monthlyTotals.map((amt, i) => {
-    const pct = Math.round((amt / monthlyExpected) * 100);
+    const pct = monthlyExpected ? Math.round((amt / monthlyExpected) * 100) : 0;
     const barPct = Math.round((amt / maxMonth) * 100);
     const contributors = members.filter(m => m.monthly[i] > 0).length;
     const status = amt >= monthlyExpected
