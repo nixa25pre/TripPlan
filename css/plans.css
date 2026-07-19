@@ -1,0 +1,267 @@
+/* Shared styles for Train + Flight plan pages and nav buttons */
+
+.plan-nav {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 15px;
+  margin-bottom: 25px;
+}
+
+.plan-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  padding: 18px;
+  border-radius: 16px;
+  font-family: 'Poppins', sans-serif;
+  font-weight: 600;
+  font-size: 1rem;
+  text-decoration: none;
+  color: white;
+  background: linear-gradient(135deg, #1e3a8a, #2563eb);
+  box-shadow: 0 8px 24px rgba(37, 99, 235, 0.25);
+  transition: transform 0.25s ease, box-shadow 0.25s ease, filter 0.25s ease;
+}
+
+.plan-btn.train {
+  background: linear-gradient(135deg, #0f766e, #22c55e);
+  box-shadow: 0 8px 24px rgba(34, 197, 94, 0.25);
+}
+
+.plan-btn.flight {
+  background: linear-gradient(135deg, #7c3aed, #ec4899);
+  box-shadow: 0 8px 24px rgba(236, 72, 153, 0.25);
+}
+
+.plan-btn:hover {
+  transform: translateY(-3px) scale(1.02);
+  filter: brightness(1.1);
+}
+
+.plan-btn:active { transform: translateY(0) scale(0.99); }
+
+@media (max-width: 520px) {
+  .plan-nav { grid-template-columns: 1fr; }
+}
+
+/* ================= PLAN PAGES ================= */
+
+body.plan-page {
+  background: radial-gradient(ellipse at top, #0b1d3d 0%, #050d1f 60%, #030814 100%);
+  min-height: 100vh;
+  color: white;
+  font-family: 'Poppins', sans-serif;
+}
+
+.plan-container {
+  max-width: 900px;
+  margin: auto;
+  padding: 24px 18px 60px;
+}
+
+.plan-header {
+  text-align: center;
+  margin-bottom: 30px;
+  animation: fadeDown 0.7s ease both;
+}
+
+.plan-header .badge {
+  display: inline-block;
+  padding: 6px 14px;
+  font-size: 0.75rem;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  border-radius: 999px;
+  background: rgba(255,255,255,0.08);
+  border: 1px solid rgba(255,255,255,0.12);
+  margin-bottom: 14px;
+}
+
+.plan-header h1 {
+  font-size: 2.2rem;
+  margin: 0 0 8px;
+  background: linear-gradient(90deg, #22c55e, #38bdf8, #a855f7);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
+.plan-header p { opacity: 0.75; margin: 0; }
+
+.back-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  color: #93c5fd;
+  text-decoration: none;
+  font-size: 0.9rem;
+  margin-bottom: 20px;
+  transition: color 0.2s;
+}
+.back-link:hover { color: #fff; }
+
+/* Timeline */
+.timeline {
+  position: relative;
+  padding-left: 28px;
+  margin: 0;
+  list-style: none;
+}
+
+.timeline::before {
+  content: "";
+  position: absolute;
+  top: 6px;
+  bottom: 6px;
+  left: 10px;
+  width: 2px;
+  background: linear-gradient(to bottom, #22c55e, #38bdf8, #a855f7);
+  opacity: 0.5;
+  border-radius: 2px;
+}
+
+.t-item {
+  position: relative;
+  padding: 18px 20px;
+  margin-bottom: 18px;
+  border-radius: 18px;
+  background: rgba(18, 33, 61, 0.75);
+  backdrop-filter: blur(8px);
+  border: 1px solid rgba(255,255,255,0.06);
+  animation: fadeUp 0.6s ease both;
+}
+
+.t-item::before {
+  content: "";
+  position: absolute;
+  left: -23px;
+  top: 22px;
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  background: #22c55e;
+  box-shadow: 0 0 0 4px rgba(34, 197, 94, 0.2);
+}
+
+.t-item.travel::before { background: #38bdf8; box-shadow: 0 0 0 4px rgba(56,189,248,0.2); }
+.t-item.food::before   { background: #f59e0b; box-shadow: 0 0 0 4px rgba(245,158,11,0.2); }
+.t-item.fun::before    { background: #ec4899; box-shadow: 0 0 0 4px rgba(236,72,153,0.2); }
+.t-item.stay::before   { background: #a855f7; box-shadow: 0 0 0 4px rgba(168,85,247,0.2); }
+
+.t-time {
+  font-size: 0.72rem;
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+  opacity: 0.7;
+  margin-bottom: 4px;
+}
+
+.t-item h3 {
+  margin: 0 0 6px;
+  font-size: 1.1rem;
+}
+
+.t-item p { margin: 4px 0; opacity: 0.85; font-size: 0.92rem; }
+
+.t-meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 10px;
+}
+
+.chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 4px 10px;
+  border-radius: 999px;
+  font-size: 0.75rem;
+  background: rgba(255,255,255,0.06);
+  border: 1px solid rgba(255,255,255,0.08);
+}
+
+.chip.cost { color: #22c55e; border-color: rgba(34,197,94,0.3); }
+.chip.dist { color: #38bdf8; border-color: rgba(56,189,248,0.3); }
+
+/* Section headers */
+.day-header {
+  margin: 30px 0 14px;
+  padding: 14px 18px;
+  border-radius: 14px;
+  background: linear-gradient(90deg, rgba(34,197,94,0.15), rgba(56,189,248,0.1));
+  border-left: 4px solid #22c55e;
+  animation: fadeUp 0.6s ease both;
+}
+.day-header h2 { margin: 0; font-size: 1.15rem; }
+.day-header span { opacity: 0.7; font-size: 0.8rem; }
+
+/* Budget table */
+.budget {
+  margin-top: 30px;
+  padding: 20px;
+  border-radius: 20px;
+  background: rgba(18, 33, 61, 0.75);
+  border: 1px solid rgba(255,255,255,0.06);
+  animation: fadeUp 0.6s ease both;
+}
+.budget h2 { margin-top: 0; }
+.budget-row {
+  display: flex;
+  justify-content: space-between;
+  padding: 10px 0;
+  border-bottom: 1px dashed rgba(255,255,255,0.08);
+}
+.budget-row:last-child { border-bottom: none; }
+.budget-row.total { font-weight: 700; color: #22c55e; font-size: 1.1rem; padding-top: 14px; }
+
+/* Carry list */
+.carry {
+  margin-top: 24px;
+  padding: 20px;
+  border-radius: 20px;
+  background: rgba(18, 33, 61, 0.75);
+  border: 1px solid rgba(255,255,255,0.06);
+  animation: fadeUp 0.6s ease both;
+}
+.carry h2 { margin-top: 0; }
+.carry-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+  gap: 10px;
+  margin-top: 10px;
+}
+.carry-grid div {
+  padding: 10px 12px;
+  border-radius: 10px;
+  background: rgba(255,255,255,0.04);
+  font-size: 0.88rem;
+}
+
+/* Stagger animations */
+.stagger > * { opacity: 0; animation: fadeUp 0.6s ease forwards; }
+.stagger > *:nth-child(1) { animation-delay: 0.05s; }
+.stagger > *:nth-child(2) { animation-delay: 0.10s; }
+.stagger > *:nth-child(3) { animation-delay: 0.15s; }
+.stagger > *:nth-child(4) { animation-delay: 0.20s; }
+.stagger > *:nth-child(5) { animation-delay: 0.25s; }
+.stagger > *:nth-child(6) { animation-delay: 0.30s; }
+.stagger > *:nth-child(7) { animation-delay: 0.35s; }
+.stagger > *:nth-child(8) { animation-delay: 0.40s; }
+.stagger > *:nth-child(9) { animation-delay: 0.45s; }
+.stagger > *:nth-child(10){ animation-delay: 0.50s; }
+
+@keyframes fadeUp {
+  from { opacity: 0; transform: translateY(14px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+@keyframes fadeDown {
+  from { opacity: 0; transform: translateY(-14px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+@media (max-width: 520px) {
+  .plan-header h1 { font-size: 1.6rem; }
+  .t-item { padding: 14px 16px; }
+}
