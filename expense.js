@@ -1,58 +1,36 @@
 const EXPENSE_API_URL = window.EXPENSE_API_URL || "";
-// Keep savings identical to the Home Page. The published Google Sheet is the source of truth.
-const SAVINGS_CSV_URL = "https://docs.google.com/spreadsheets/d/1EELxeBDFyC_Xye3tYct_YvVELuph6AbgFZ9y_vWt_ww/export?format=csv";
-
 const money = value => "₹" + Number(value || 0).toLocaleString("en-IN", { maximumFractionDigits: 2 });
 
-function getLocalExpenses() {
-  try {
-    const records = JSON.parse(localStorage.getItem("goaTripLocalExpenses") || "[]");
-    return Array.isArray(records) ? records : [];
-  } catch {
-    return [];
-  }
-}
-
-// Parse CSV rows correctly, including quoted cells containing commas.
-function parseCsvRow(row) {
-  const cells = [];
-  let cell = "";
-  let quoted = false;
-  for (let i = 0; i < row.length; i++) {
-    const ch = row[i];
-    if (ch === '"') {
-      if (quoted && row[i + 1] === '"') { cell += '"'; i++; }
-      else quoted = !quoted;
-    } else if (ch === "," && !quoted) {
-      cells.push(cell.trim());
-      cell = "";
-    } else {
-      cell += ch;
-    }
-  }
-  cells.push(cell.trim());
-  return cells;
-}
+// Keep Expenses Page savings identical to the Home Page:
+// savings = sum of the 10 active monthly contribution columns (Jan-Oct).
+// Do not use the sheet's "Total per Person" column because it can be stale/different.
+const SAVINGS_CSV_URL = "https://docs.google.com/spreadsheets/d/1EELxeBDFyC_Xye3tYct_YvVELuph6AbgFZ9y_vWt_ww/export?format=csv";
 
 async function fetchTripSavings() {
   const response = await fetch(SAVINGS_CSV_URL, { cache: "no-store" });
   if (!response.ok) throw new Error("Could not load trip savings from the Google Sheet.");
 
   const csv = await response.text();
-  const rows = csv.split(/\r?\n/).filter(row => row.trim() !== "");
-  let total = 0;
+  const rows = csv.split("\n").map(row => row.replace(/\r/g, ""));
+  let totalSaved = 0;
 
-  // Column O (zero-based index 14) is Total per Person, matching Home Page script.js.
+  // Header is row 0. Jan-Oct are columns C-L (indexes 2-11).
   for (let i = 1; i < rows.length; i++) {
-    const cols = parseCsvRow(rows[i]);
-    const name = String(cols[0] || "").trim();
+    const cols = rows[i].split(",");
+    const name = (cols[0] || "").trim();
     if (!name) continue;
     if (/^total/i.test(name) || /^overall/i.test(name)) break;
-    total += Number(String(cols[14] || "").replace(/[₹,\s]/g, "")) || 0;
+
+    for (let month = 0; month < 10; month++) {
+      totalSaved += Number((cols[2 + month] || "0").trim()) || 0;
+    }
   }
 
-  console.log("[TripPlan Expenses] Savings loaded from Home Page sheet:", total);
-  return total;
+  console.log("[Expenses] Total Trip Savings (Jan-Oct):", totalSaved);
+  return totalSaved;
+}
+function getLocalExpenses() {
+  try { const records = JSON.parse(localStorage.getItem("goaTripLocalExpenses") || "[]"); return Array.isArray(records) ? records : []; } catch { return []; }
 }
 
 function showAlert(message, type = "success") {
@@ -84,15 +62,12 @@ function setSavingsSummary(expenses, totalSavings = null) {
   const totalSpent = expenses.reduce((sum, x) => sum + Number(x.amount || 0), 0);
   document.getElementById("overallTotal").textContent = money(totalSpent);
   document.getElementById("expenseCount").textContent = expenses.length;
-
   const savings = Number(totalSavings);
-  const hasSavings = Number.isFinite(savings);
+  const hasSavings = totalSavings !== null && totalSavings !== undefined && Number.isFinite(savings);
   document.getElementById("totalSavings").textContent = hasSavings ? money(savings) : "—";
-
   const balance = document.getElementById("balanceAmount");
   balance.textContent = hasSavings ? money(savings - totalSpent) : "—";
   balance.closest(".expense-card")?.classList.toggle("negative", hasSavings && savings - totalSpent < 0);
-
   const latest = groupExpenses(expenses)[0];
   const latestTotal = latest ? latest[1].reduce((sum, x) => sum + Number(x.amount || 0), 0) : 0;
   document.getElementById("latestDayTotal").textContent = money(latestTotal);
@@ -149,7 +124,6 @@ document.addEventListener("DOMContentLoaded", () => {
   const refresh = document.getElementById("refreshExpenses");
   const search = document.getElementById("expenseSearch");
   let allExpenses = [], totalSavings = null;
-
   async function refreshData(showSuccess = false) {
     const container = document.getElementById("expenseGroups");
     container.setAttribute("aria-busy", "true");
@@ -158,29 +132,18 @@ document.addEventListener("DOMContentLoaded", () => {
     try {
       const data = await apiRequest("list");
       allExpenses = [...(Array.isArray(data.expenses) ? data.expenses : []), ...getLocalExpenses()];
-
-      // Always use the same Google Sheet calculation as Home Page.
-      // The expense API may not return totalSavings/savings, which previously caused "—".
+      // Always use the same Jan-Oct savings calculation as the Home Page.
+      // The Expense API may return an older/different aggregate (e.g. ₹47,500),
+      // so it must not override the Home Page's actual savings total.
       totalSavings = await fetchTripSavings();
-
-      console.log("[TripPlan Expenses] DEBUG", {
-        totalSavings,
-        totalSpent: allExpenses.reduce((sum, item) => sum + Number(item.amount || 0), 0),
-        savingsRemaining: totalSavings - allExpenses.reduce((sum, item) => sum + Number(item.amount || 0), 0)
-      });
-
       renderExpenses(allExpenses, totalSavings);
       if (showSuccess) showAlert("Expense records refreshed.");
     } catch (error) {
-      console.error("[TripPlan Expenses] Failed to load:", error);
       container.setAttribute("aria-busy", "false");
       container.innerHTML = `<div class="expense-card empty-expenses"><i class="bi bi-exclamation-triangle"></i><p>${escapeHtml(error.message)}</p></div>`;
       showAlert(error.message, "error");
-    } finally {
-      refresh.disabled = false;
-    }
+    } finally { refresh.disabled = false; }
   }
-
   refresh.addEventListener("click", () => refreshData(true));
   search.addEventListener("input", () => {
     const query = search.value.trim().toLowerCase();
