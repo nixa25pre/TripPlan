@@ -1,4 +1,4 @@
-const GOAL_AMOUNT = 111000;
+const GOAL_AMOUNT = 100000;
 console.log("APP STARTED");
 
 /*
@@ -21,7 +21,7 @@ fetch(CSV_URL)
 
     let totalSaved = 0;
 
-    const monthlyTotals = new Array(12).fill(0);
+    const monthlyTotals = new Array(10).fill(0);
 
     
 
@@ -46,7 +46,7 @@ fetch(CSV_URL)
 
     totalSaved += total;
 
-    for(let m=0; m<12; m++)
+    for(let m=0; m<10; m++)
     {
         const value =
             Number(
@@ -76,7 +76,7 @@ console.log("Monthly Totals =", monthlyTotals);
 
 function calculateMonthlyTotals(members)
 {
-    const monthlyTotals = new Array(12).fill(0);
+    const monthlyTotals = new Array(10).fill(0);
 
     members.forEach(member => {
 
@@ -210,9 +210,7 @@ function loadMonthlyChart(monthlyTotals)
                     'Jul',
                     'Aug',
                     'Sep',
-                    'Oct',
-                    'Nov',
-                    'Dec'
+                    'Oct'
                 ],
                 datasets:[
                 {
@@ -275,7 +273,7 @@ function loadMemberCards()
 
     memberData.forEach(member=>{
 
-        const expected = 12000;
+        const expected = 10000;
 
         const pending =
             expected - member.total;

@@ -147,6 +147,25 @@ Monthly Collection:
 
 ## ▶️ Run Locally
 
+## 👤 Member account storage
+
+The Create account tab stores member details in the browser's `localStorage` under
+`goaTripAccounts`. Each record contains an id, display name, normalized username,
+member role, and creation date. Passwords are transformed to a SHA-256 hash before
+storage and are never displayed in the Stored accounts section.
+
+The browser-only flow is implemented in `account-store.js`:
+
+1. `TripAccountStore.create()` validates the account and writes it to storage.
+2. `TripAccountStore.authenticate()` hashes the supplied password and compares it
+   to the saved hash.
+3. On sign-in, the session identifies the account; expenses created by that
+   account are saved in `goaTripLocalExpenses` and are shown on the overview.
+
+Because this is a static site, these accounts are specific to the current browser
+and device. A shared, production account system requires a server-side API and a
+database with salted password hashes.
+
 Start a local server:
 
 ```bash

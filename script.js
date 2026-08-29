@@ -1,8 +1,8 @@
 // ====== CONFIG ======
 const CSV_URL = "https://docs.google.com/spreadsheets/d/1EELxeBDFyC_Xye3tYct_YvVELuph6AbgFZ9y_vWt_ww/export?format=csv";
-const PER_MEMBER_TARGET = 12000;
-const MONTHS = ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
-const MONTH_EMOJI = ["❄️","💝","🌸","🌷","🌻","☀️","🏖️","🌊","🍂","🎃","🪔","🎄"];
+const PER_MEMBER_TARGET = 10000;
+const MONTHS = ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct"];
+const MONTH_EMOJI = ["❄️","💝","🌸","🌷","🌻","☀️","🏖️","🌊","🍂","🎃"];
 
 const EMOJI_MAP = {
   "Arulanand":"🌴","Edward":"🏝️","Nixan":"🌊","Kithiyon":"🥥","Jacques":"🍹",
@@ -19,8 +19,7 @@ fetch(CSV_URL)
   .then(csv => {
     const rows = csv.split("\n").map(r => r.replace(/\r/g, ""));
     const members = [];
-    const monthlyTotals = new Array(12).fill(0);
-
+    const monthlyTotals = new Array(10).fill(0);
     // Start at row 1 (skip header), stop on blank/summary rows
     for (let i = 1; i < rows.length; i++) {
       const cols = rows[i].split(",");
@@ -30,7 +29,7 @@ fetch(CSV_URL)
       if (/^total/i.test(name) || /^overall/i.test(name)) break;
 
       const monthly = [];
-      for (let m = 0; m < 12; m++) {
+      for (let m = 0; m < 10; m++) {
         const v = Number(cols[2 + m]) || 0;
         monthly.push(v);
         monthlyTotals[m] += v;
@@ -95,7 +94,7 @@ function render(members, monthlyTotals) {
   const maxMonth = Math.max(1, ...monthlyTotals);
   const monthlyExpected = members.length * 1000;
   document.getElementById("monthlyMeta").textContent =
-    `Target ${fmt(monthlyExpected)}/month · 12 months`;
+    `Target ${fmt(monthlyExpected)}/month · 10 months`;
 
   document.getElementById("monthlyGrid").innerHTML = monthlyTotals.map((amt, i) => {
     const pct = monthlyExpected ? Math.round((amt / monthlyExpected) * 100) : 0;
@@ -126,7 +125,7 @@ function render(members, monthlyTotals) {
   document.getElementById("monthlySummary").innerHTML = `
     <div class="m-sum"><span class="tiny muted">Collected</span><strong class="g-sunset">${fmt(monthlyTotal)}</strong></div>
     <div class="m-sum"><span class="tiny muted">Best month</span><strong class="primary">${MONTH_EMOJI[bestIdx]} ${MONTHS[bestIdx]}</strong></div>
-    <div class="m-sum"><span class="tiny muted">Avg / month</span><strong class="accent">${fmt(Math.round(monthlyTotal/12))}</strong></div>
+    <div class="m-sum"><span class="tiny muted">Avg / month</span><strong class="accent">${fmt(Math.round(monthlyTotal/10))}</strong></div>
   `;
 
   document.getElementById("crewMeta").textContent = `${members.length} travelers · ${fmt(PER_MEMBER_TARGET)} each`;
