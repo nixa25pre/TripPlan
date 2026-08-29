@@ -1,0 +1,877 @@
+/* =========================================================
+   TRAIN TICKETS PAGE
+   Goa Trip Planner
+========================================================= */
+
+:root {
+    --ticket-bg: #07142a;
+    --ticket-card: rgba(18, 33, 61, .78);
+    --ticket-border: rgba(148, 163, 184, .16);
+    --ticket-text: #fafaf2;
+    --ticket-muted: #9fb4cc;
+}
+
+
+/* =========================================================
+   PAGE
+========================================================= */
+
+body {
+    margin: 0;
+    min-height: 100vh;
+    background:
+        radial-gradient(
+            ellipse at top,
+            rgba(60, 127, 200, .45),
+            transparent 58%
+        ),
+        radial-gradient(
+            ellipse at bottom right,
+            rgba(246, 150, 64, .20),
+            transparent 55%
+        ),
+        #07142a;
+
+    color: var(--ticket-text);
+    font-family:
+        -apple-system,
+        BlinkMacSystemFont,
+        "Segoe UI",
+        Roboto,
+        Inter,
+        sans-serif;
+}
+
+
+/* =========================================================
+   AMBIENT
+========================================================= */
+
+.ticket-ambient {
+    position: fixed;
+    inset: 0;
+    overflow: hidden;
+    pointer-events: none;
+    z-index: 0;
+}
+
+.ambient-icon {
+    position: absolute;
+    opacity: .10;
+    font-size: 3rem;
+    animation: ticketFloat 6s ease-in-out infinite;
+}
+
+.icon-1 {
+    top: 12%;
+    left: 6%;
+}
+
+.icon-2 {
+    top: 30%;
+    right: 7%;
+    animation-delay: 1s;
+}
+
+.icon-3 {
+    top: 65%;
+    left: 8%;
+    animation-delay: 2s;
+}
+
+.icon-4 {
+    bottom: 8%;
+    right: 12%;
+    animation-delay: 3s;
+}
+
+.icon-5 {
+    top: 8%;
+    right: 30%;
+    animation-delay: 1.5s;
+}
+
+@keyframes ticketFloat {
+
+    0%,
+    100% {
+        transform: translateY(0) rotate(0deg);
+    }
+
+    50% {
+        transform: translateY(-15px) rotate(4deg);
+    }
+}
+
+
+/* =========================================================
+   CONTAINER
+========================================================= */
+
+.ticket-container {
+    position: relative;
+    z-index: 1;
+
+    width: min(1100px, calc(100% - 32px));
+    margin: auto;
+
+    padding: 28px 0 50px;
+}
+
+
+/* =========================================================
+   HERO
+========================================================= */
+
+.ticket-hero {
+    text-align: center;
+    margin-bottom: 30px;
+}
+
+.back-btn {
+    display: inline-flex;
+    align-items: center;
+
+    margin-bottom: 22px;
+
+    padding: 9px 15px;
+
+    border-radius: 999px;
+
+    color: #dceeff;
+    background: rgba(11, 24, 48, .55);
+
+    border: 1px solid var(--ticket-border);
+
+    text-decoration: none;
+    font-size: .85rem;
+    font-weight: 600;
+
+    transition:
+        transform .2s ease,
+        background .2s ease;
+}
+
+.back-btn:hover {
+    transform: translateX(-4px);
+    background: rgba(30, 60, 100, .7);
+}
+
+.ticket-chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+
+    padding: 8px 16px;
+
+    border-radius: 999px;
+
+    background:
+        linear-gradient(
+            135deg,
+            rgba(60, 127, 200, .35),
+            rgba(40, 90, 160, .25)
+        );
+
+    border: 1px solid var(--ticket-border);
+
+    color: #4ed8e8;
+
+    font-size: .75rem;
+    font-weight: 700;
+
+    letter-spacing: .08em;
+    text-transform: uppercase;
+}
+
+.ticket-hero h1 {
+    margin: 16px 0 7px;
+
+    font-size: clamp(2.2rem, 7vw, 4rem);
+    line-height: 1;
+    font-weight: 900;
+
+    letter-spacing: -.03em;
+}
+
+.ticket-hero h1 span {
+    background:
+        linear-gradient(
+            135deg,
+            #36d6e5,
+            #f7a83a,
+            #ff6b4a
+        );
+
+    -webkit-background-clip: text;
+    background-clip: text;
+
+    color: transparent;
+}
+
+.ticket-hero p {
+    margin: 0;
+
+    color: var(--ticket-muted);
+    font-size: .95rem;
+}
+
+
+/* =========================================================
+   STATS
+========================================================= */
+
+.ticket-stats {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 12px;
+
+    margin-bottom: 20px;
+}
+
+.ticket-stat {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+
+    padding: 16px;
+
+    border-radius: 18px;
+
+    background:
+        linear-gradient(
+            135deg,
+            rgba(60, 110, 170, .40),
+            rgba(40, 80, 140, .25)
+        );
+
+    backdrop-filter: blur(18px);
+    -webkit-backdrop-filter: blur(18px);
+
+    border: 1px solid var(--ticket-border);
+}
+
+.stat-icon {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    width: 42px;
+    height: 42px;
+
+    border-radius: 13px;
+
+    background: rgba(11, 24, 48, .5);
+
+    font-size: 1.3rem;
+}
+
+.stat-label {
+    display: block;
+
+    color: var(--ticket-muted);
+
+    font-size: .65rem;
+    text-transform: uppercase;
+    letter-spacing: .1em;
+}
+
+.ticket-stat strong {
+    display: block;
+
+    margin-top: 3px;
+
+    font-size: 1.05rem;
+    font-weight: 900;
+}
+
+
+/* =========================================================
+   SEARCH
+========================================================= */
+
+.ticket-search {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+
+    margin-bottom: 20px;
+
+    padding: 6px 15px;
+
+    border-radius: 15px;
+
+    background: rgba(18, 33, 61, .8);
+
+    border: 1px solid var(--ticket-border);
+
+    backdrop-filter: blur(18px);
+}
+
+.search-icon {
+    font-size: 1.1rem;
+}
+
+.ticket-search input {
+    width: 100%;
+
+    padding: 12px 4px;
+
+    border: 0;
+    outline: 0;
+
+    color: white;
+    background: transparent;
+
+    font-size: .95rem;
+}
+
+.ticket-search input::placeholder {
+    color: #7186a2;
+}
+
+
+/* =========================================================
+   JOURNEY CARD
+========================================================= */
+
+.journey {
+    position: relative;
+    overflow: hidden;
+
+    margin-bottom: 22px;
+
+    border-radius: 24px;
+
+    background:
+        linear-gradient(
+            135deg,
+            rgba(18, 33, 61, .92),
+            rgba(11, 24, 48, .85)
+        );
+
+    border: 1px solid var(--ticket-border);
+
+    box-shadow:
+        0 20px 45px rgba(0, 0, 0, .20);
+
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+}
+
+
+/* Route-specific colors */
+
+.journey-chennai {
+    --route-primary: #4ed8e8;
+    --route-secondary: #3c7fc8;
+    --route-glow: rgba(78, 216, 232, .22);
+}
+
+.journey-villupuram {
+    --route-primary: #a78bfa;
+    --route-secondary: #6366f1;
+    --route-glow: rgba(139, 92, 246, .22);
+}
+
+.journey-goa {
+    --route-primary: #f6c651;
+    --route-secondary: #f59640;
+    --route-glow: rgba(246, 198, 81, .22);
+}
+
+.journey-return {
+    --route-primary: #ff6b4a;
+    --route-secondary: #ec4899;
+    --route-glow: rgba(255, 107, 74, .22);
+}
+
+
+/* Route glow */
+
+.journey::before {
+    content: "";
+
+    position: absolute;
+
+    width: 260px;
+    height: 260px;
+
+    top: -150px;
+    right: -80px;
+
+    border-radius: 50%;
+
+    background: var(--route-glow);
+
+    filter: blur(60px);
+
+    pointer-events: none;
+}
+
+
+/* =========================================================
+   JOURNEY HEADER
+========================================================= */
+
+.journey-header {
+    position: relative;
+    z-index: 1;
+
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+
+    gap: 20px;
+
+    padding: 22px;
+
+    border-bottom: 1px solid var(--ticket-border);
+}
+
+.journey-title {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+}
+
+.journey-icon {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    width: 54px;
+    height: 54px;
+
+    flex-shrink: 0;
+
+    border-radius: 16px;
+
+    background:
+        linear-gradient(
+            135deg,
+            var(--route-primary),
+            var(--route-secondary)
+        );
+
+    box-shadow:
+        0 10px 25px var(--route-glow);
+
+    font-size: 1.5rem;
+}
+
+.journey-number {
+    display: block;
+
+    margin-bottom: 3px;
+
+    color: var(--route-primary);
+
+    font-size: .65rem;
+    font-weight: 800;
+
+    letter-spacing: .15em;
+}
+
+.journey h2 {
+    margin: 0;
+
+    font-size: clamp(1.2rem, 3vw, 1.55rem);
+    font-weight: 900;
+}
+
+.journey-title p {
+    margin: 4px 0 0;
+
+    color: var(--ticket-muted);
+
+    font-size: .78rem;
+}
+
+.journey-date {
+    min-width: 135px;
+
+    text-align: right;
+}
+
+.journey-date span {
+    display: block;
+
+    color: var(--ticket-muted);
+
+    font-size: .65rem;
+    text-transform: uppercase;
+    letter-spacing: .1em;
+}
+
+.journey-date strong {
+    display: block;
+
+    margin-top: 4px;
+
+    font-size: .85rem;
+}
+
+.journey-date b {
+    display: block;
+
+    margin-top: 2px;
+
+    color: var(--route-primary);
+
+    font-size: 1.15rem;
+}
+
+
+/* =========================================================
+   ROUTE
+========================================================= */
+
+.route-line {
+    display: grid;
+
+    grid-template-columns: 1fr auto 1fr;
+
+    align-items: center;
+
+    gap: 14px;
+
+    padding: 20px 22px;
+
+    background: rgba(5, 16, 34, .25);
+}
+
+.station {
+    display: flex;
+    flex-direction: column;
+
+    gap: 3px;
+}
+
+.station strong {
+    font-size: 1.15rem;
+    font-weight: 900;
+
+    color: var(--route-primary);
+}
+
+.station span {
+    font-size: .72rem;
+    font-weight: 700;
+}
+
+.station small {
+    color: var(--ticket-muted);
+
+    font-size: .68rem;
+}
+
+.station.destination {
+    text-align: right;
+}
+
+.route-track {
+    display: flex;
+    align-items: center;
+
+    min-width: 130px;
+}
+
+.track-line {
+    flex: 1;
+
+    height: 2px;
+
+    background:
+        linear-gradient(
+            90deg,
+            var(--route-primary),
+            var(--route-secondary)
+        );
+}
+
+.train-dot {
+    width: 8px;
+    height: 8px;
+
+    border-radius: 50%;
+
+    background: var(--route-primary);
+
+    box-shadow:
+        0 0 10px var(--route-primary);
+}
+
+.train-symbol {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    width: 36px;
+    height: 36px;
+
+    margin: 0 7px;
+
+    border-radius: 50%;
+
+    background: rgba(11, 24, 48, .85);
+
+    border: 1px solid var(--route-primary);
+
+    font-size: 1rem;
+}
+
+
+/* =========================================================
+   PASSENGERS
+========================================================= */
+
+.passenger-list {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+
+    gap: 10px;
+
+    padding: 18px 22px 22px;
+}
+
+.passenger {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+
+    gap: 12px;
+
+    padding: 12px;
+
+    border-radius: 14px;
+
+    background: rgba(11, 24, 48, .48);
+
+    border: 1px solid rgba(148, 163, 184, .08);
+
+    transition:
+        transform .2s ease,
+        background .2s ease;
+}
+
+.passenger:hover {
+    transform: translateY(-2px);
+
+    background: rgba(25, 49, 82, .65);
+}
+
+.passenger-main {
+    display: flex;
+    align-items: center;
+
+    gap: 10px;
+
+    min-width: 0;
+}
+
+.passenger-avatar {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    width: 38px;
+    height: 38px;
+
+    flex-shrink: 0;
+
+    border-radius: 12px;
+
+    background:
+        linear-gradient(
+            135deg,
+            var(--route-primary),
+            var(--route-secondary)
+        );
+
+    color: #07142a;
+
+    font-size: .68rem;
+    font-weight: 900;
+}
+
+.passenger-main div {
+    min-width: 0;
+}
+
+.passenger-main strong {
+    display: block;
+
+    overflow: hidden;
+
+    text-overflow: ellipsis;
+    white-space: nowrap;
+
+    font-size: .82rem;
+}
+
+.passenger-main span:not(.passenger-avatar) {
+    display: block;
+
+    margin-top: 3px;
+
+    color: var(--ticket-muted);
+
+    font-size: .65rem;
+}
+
+.seat {
+    flex-shrink: 0;
+
+    padding: 7px 9px;
+
+    border-radius: 999px;
+
+    font-size: .65rem;
+    font-weight: 800;
+
+    white-space: nowrap;
+}
+
+.seat.confirmed {
+    background: rgba(34, 197, 94, .12);
+    color: #86efac;
+
+    border: 1px solid rgba(34, 197, 94, .20);
+}
+
+.seat.waiting {
+    background: rgba(234, 179, 8, .12);
+    color: #fde68a;
+
+    border: 1px solid rgba(234, 179, 8, .20);
+}
+
+
+/* =========================================================
+   FOOTER
+========================================================= */
+
+.ticket-footer {
+    padding: 20px;
+
+    text-align: center;
+
+    color: var(--ticket-muted);
+
+    font-size: .75rem;
+}
+
+.ticket-footer span {
+    margin: 0 5px;
+}
+
+
+/* =========================================================
+   RESPONSIVE
+========================================================= */
+
+@media (max-width: 850px) {
+
+    .ticket-stats {
+        grid-template-columns: repeat(2, 1fr);
+    }
+
+    .passenger-list {
+        grid-template-columns: 1fr;
+    }
+
+}
+
+
+@media (max-width: 650px) {
+
+    .ticket-container {
+        width: min(100% - 20px, 1100px);
+        padding-top: 18px;
+    }
+
+    .ticket-stats {
+        grid-template-columns: 1fr 1fr;
+        gap: 8px;
+    }
+
+    .ticket-stat {
+        padding: 12px;
+    }
+
+    .stat-icon {
+        width: 36px;
+        height: 36px;
+    }
+
+    .journey-header {
+        align-items: flex-start;
+        flex-direction: column;
+    }
+
+    .journey-date {
+        width: 100%;
+        text-align: left;
+
+        padding-left: 68px;
+    }
+
+    .route-line {
+        grid-template-columns: 1fr;
+        gap: 10px;
+    }
+
+    .station,
+    .station.destination {
+        text-align: left;
+    }
+
+    .route-track {
+        width: 100%;
+        min-width: 0;
+    }
+
+    .journey {
+        border-radius: 20px;
+    }
+
+}
+
+
+@media (max-width: 430px) {
+
+    .ticket-stats {
+        grid-template-columns: 1fr 1fr;
+    }
+
+    .ticket-stat {
+        gap: 7px;
+    }
+
+    .ticket-stat strong {
+        font-size: .9rem;
+    }
+
+    .journey-header {
+        padding: 16px;
+    }
+
+    .route-line {
+        padding: 16px;
+    }
+
+    .passenger-list {
+        padding: 14px;
+    }
+
+    .passenger {
+        align-items: flex-start;
+        flex-direction: column;
+    }
+
+    .seat {
+        margin-left: 48px;
+    }
+
+}
