@@ -137,15 +137,54 @@
       } catch (error) { showAlert(error.message || "Incorrect username or password.", "error"); } finally { submit.disabled = false; }
     });
     document.getElementById("registerForm").addEventListener("submit", async event => {
-      event.preventDefault(); const form = event.currentTarget; if (!form.reportValidity()) return;
-      const password = document.getElementById("registerPass").value;
-      if (password !== document.getElementById("confirmPass").value) { showAlert("Passwords do not match.", "error"); return; }
-      const submit = form.querySelector("button[type=submit]"); submit.disabled = true;
-      try {
-        await TripAccountStore.create({ name: document.getElementById("registerName").value, username: document.getElementById("registerUser").value, password });
-        form.reset(); renderStoredAccounts(); setMode("login"); showAlert("Member account saved on this device. You can now sign in and add expenses.");
-      } catch (error) { showAlert(error.message, "error"); } finally { submit.disabled = false; }
-    });
+        event.preventDefault();
+
+        const form = event.currentTarget;
+
+        if (!form.reportValidity()) return;
+
+        const name = document.getElementById("registerName").value.trim();
+        const username = document.getElementById("registerUser").value.trim();
+        const password = document.getElementById("registerPass").value;
+        const confirmPassword = document.getElementById("confirmPass").value;
+
+        if (password !== confirmPassword) {
+          showAlert("Passwords do not match.", "error");
+          return;
+        }
+
+        const submit = form.querySelector("button[type=submit]");
+        submit.disabled = true;
+
+        try {
+
+          // Save the member account in Google Sheets
+          await authRequest("register", {
+            name: name,
+            username: username,
+            password: password
+          });
+
+          form.reset();
+
+          setMode("login");
+
+          showAlert(
+            "Member account created successfully. You can now sign in from any device."
+          );
+
+        } catch (error) {
+
+          showAlert(
+            error.message || "Could not create the account.",
+            "error"
+          );
+
+        } finally {
+
+          submit.disabled = false;
+        }
+      });
     renderStoredAccounts();
   </script>
 </body>

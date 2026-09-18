@@ -51,24 +51,297 @@
     function alertMsg(message, type = "success") { const alert = document.getElementById("adminAlert"); alert.className = "alert " + type; alert.textContent = message; }
     const loginMessage = sessionStorage.getItem("tripLoginMessage");
     if (loginMessage) { alertMsg(loginMessage); sessionStorage.removeItem("tripLoginMessage"); }
-    function localExpenses() { try { const records = JSON.parse(localStorage.getItem("goaTripLocalExpenses") || "[]"); return Array.isArray(records) ? records : []; } catch { return []; } }
-    function writeLocalExpenses(records) { localStorage.setItem("goaTripLocalExpenses", JSON.stringify(records)); }
     async function adminRequest(action, payload = {}) {
-      if (localAccount) {
-        const records = localExpenses();
-        if (action === "list") return { ok: true, expenses: records };
-        if (action === "add") { records.push({ ...payload, id: crypto.randomUUID ? crypto.randomUUID() : String(Date.now()), updatedAt: new Date().toLocaleString("en-IN") }); writeLocalExpenses(records); return { ok: true }; }
-        if (action === "delete") { writeLocalExpenses(records.filter(record => record.id !== payload.id)); return { ok: true }; }
+
+        const url = new URL(EXPENSE_API_URL);
+
+        url.searchParams.set("action", action);
+        url.searchParams.set("token", token);
+
+        Object.entries(payload).forEach(([key, value]) => {
+          url.searchParams.set(key, value);
+        });
+
+        const response = await fetch(url, {
+          cache: "no-store"
+        });
+
+        if (!response.ok) {
+          throw new Error(
+            "Could not reach the expense service. Please try again."
+          );
+        }
+
+        const data = await response.json();
+
+        if (!data.ok) {
+          throw new Error(
+            data.error || "Request failed"
+          );
+        }
+
+        return data;
       }
-      const url = new URL(EXPENSE_API_URL); url.searchParams.set("action", action); url.searchParams.set("token", token); Object.entries(payload).forEach(([key, value]) => url.searchParams.set(key, value)); const response = await fetch(url, { cache: "no-store" }); if (!response.ok) throw new Error("Could not reach the expense service. Please try again."); const data = await response.json(); if (!data.ok) throw new Error(data.error || "Request failed"); return data;
-    }
     function renderPending() { const list = document.getElementById("pendingList"); list.innerHTML = pending.map((item, index) => `<div class="pending-item"><span><i class="bi bi-clock-history"></i> ${esc(item.date)} · ${esc(item.type)} · <strong>${money(item.amount)}</strong> · ${esc(item.updatedBy)}</span><button class="expense-btn danger small" data-remove="${index}" type="button"><i class="bi bi-x-lg"></i> Remove</button></div>`).join(""); list.querySelectorAll("[data-remove]").forEach(button => button.addEventListener("click", () => { pending.splice(Number(button.dataset.remove), 1); renderPending(); })); }
-    function renderAdmin() { const body = document.getElementById("adminRows"); const ordered = [...existing].sort((a, b) => String(b.date || "").localeCompare(String(a.date || "")) || String(b.updatedAt || "").localeCompare(String(a.updatedAt || ""))); body.innerHTML = ordered.map(item => `<tr><td>${esc(item.date)}</td><td><span class="expense-badge">${esc(item.type)}</span></td><td class="expense-amount">${money(item.amount)}</td><td>${esc(item.updatedBy)}</td><td>${esc(item.updatedAt || "—")}</td>${canManage ? `<td class="actions"><button class="expense-btn danger small" data-delete="${esc(item.id)}" type="button"><i class="bi bi-trash3"></i> Delete</button></td>` : ""}</tr>`).join("") || `<tr><td colspan="${canManage ? 6 : 5}" class="empty-cell">No expenses have been recorded yet.</td></tr>`; body.querySelectorAll("[data-delete]").forEach(button => button.addEventListener("click", async () => { if (!confirm("Delete this expense permanently?")) return; try { await adminRequest("delete", { id: button.dataset.delete }); alertMsg("Expense deleted successfully."); await loadExisting(); } catch (error) { alertMsg(error.message, "error"); } })); }
+    function renderAdmin() {
+        const body = document.getElementById("adminRows");
+
+        const ordered = [...existing].sort(
+          (a, b) =>
+            String(b.date || "").localeCompare(String(a.date || "")) ||
+            String(b.updatedAt || "").localeCompare(String(a.updatedAt || ""))
+        );
+
+        body.innerHTML = ordered.map(item => `
+    <tr>
+      <td>${esc(item.date)}</td>
+      <td><span class="expense-badge">${esc(item.type)}</span></td>
+      <td class="expense-amount">${money(item.amount)}</td>
+      <td>${esc(item.updatedBy)}</td>
+      <td>${esc(item.updatedAt || "—")}</td>
+
+      ${canManage ? `
+        <td class="actions">
+
+          <button
+            class="expense-btn secondary small"
+            data-edit="${esc(item.id)}"
+            type="button">
+            <i class="bi bi-pencil-square"></i> Edit
+          </button>
+
+          <button
+            class="expense-btn danger small"
+            data-delete="${esc(item.id)}"
+            type="button">
+            <i class="bi bi-trash3"></i> Delete
+          </button>
+
+        </td>
+      ` : ""}
+    </tr>
+  `).join("") || `
+    <tr>
+      <td colspan="${canManage ? 6 : 5}" class="empty-cell">
+        No expenses have been recorded yet.
+      </td>
+    </tr>
+  `;
+
+
+        // ============================================================
+        // DELETE
+        // ============================================================
+
+        body.querySelectorAll("[data-delete]").forEach(button => {
+
+          button.addEventListener("click", async () => {
+
+            if (!confirm("Delete this expense permanently?")) {
+              return;
+            }
+
+            try {
+
+              await adminRequest("delete", {
+                id: button.dataset.delete
+              });
+
+              alertMsg("Expense deleted successfully.");
+
+              await loadExisting();
+
+            } catch (error) {
+
+              alertMsg(
+                error.message,
+                "error"
+              );
+            }
+          });
+        });
+
+
+        // ============================================================
+        // EDIT
+        // ============================================================
+
+        body.querySelectorAll("[data-edit]").forEach(button => {
+
+          button.addEventListener("click", () => {
+
+            const item = existing.find(
+              expense =>
+                String(expense.id) ===
+                String(button.dataset.edit)
+            );
+
+            if (!item) {
+              alertMsg(
+                "Expense not found.",
+                "error"
+              );
+              return;
+            }
+
+
+            document.getElementById("date").value =
+              item.date || "";
+
+            document.getElementById("type").value =
+              item.type || "";
+
+            document.getElementById("amount").value =
+              item.amount || "";
+
+            document.getElementById("updatedBy").value =
+              username || "";
+
+
+            // Store the expense ID being edited
+            document.getElementById("expenseForm").dataset.editId =
+              item.id;
+
+
+            // Change button text
+            const saveButton =
+              document.getElementById("submitPending");
+
+            saveButton.innerHTML =
+              '<i class="bi bi-check2-circle"></i> Update expense';
+
+
+            alertMsg(
+              "Expense loaded for editing. Make your changes and click Update expense."
+            );
+
+
+            // Scroll to form
+            document.getElementById("expenseForm")
+              .scrollIntoView({
+                behavior: "smooth",
+                block: "start"
+              });
+          });
+        });
+      }
     async function loadExisting() { try { document.getElementById("reloadAdmin").disabled = true; const data = await adminRequest("list"); existing = Array.isArray(data.expenses) ? data.expenses : []; renderAdmin(); } catch (error) { alertMsg(error.message, "error"); } finally { document.getElementById("reloadAdmin").disabled = false; } }
     const expenseForm = document.getElementById("expenseForm");
     expenseForm.addEventListener("submit", event => { event.preventDefault(); const form = event.currentTarget; if (!form.reportValidity()) return; pending.push({ date: document.getElementById("date").value, type: document.getElementById("type").value, amount: Number(document.getElementById("amount").value), updatedBy: document.getElementById("updatedBy").value }); renderPending(); document.getElementById("amount").value = ""; document.getElementById("type").value = ""; alertMsg("Expense added to the save list. Save when you are ready."); });
     expenseForm.addEventListener("reset", () => setTimeout(() => { document.getElementById("date").value = new Date().toISOString().slice(0, 10); document.getElementById("updatedBy").value = username || ""; }, 0));
-    document.getElementById("submitPending").addEventListener("click", async () => { if (!pending.length) { alertMsg("Add at least one expense before saving.", "error"); return; } const submit = document.getElementById("submitPending"); submit.disabled = true; try { for (const item of pending) await adminRequest("add", item); const count = pending.length; pending = []; renderPending(); alertMsg(`${count} expense${count === 1 ? "" : "s"} saved successfully.`); await loadExisting(); } catch (error) { alertMsg(error.message, "error"); } finally { submit.disabled = false; } });
+    document.getElementById("submitPending").addEventListener("click", async () => {
+
+        const form = document.getElementById("expenseForm");
+        const editId = form.dataset.editId;
+
+        // ============================================================
+        // UPDATE EXISTING EXPENSE
+        // ============================================================
+
+        if (editId) {
+
+          if (!form.reportValidity()) {
+            return;
+          }
+
+          const submit = document.getElementById("submitPending");
+          submit.disabled = true;
+
+          try {
+
+            await adminRequest("update", {
+              id: editId,
+              date: document.getElementById("date").value,
+              type: document.getElementById("type").value,
+              amount: Number(document.getElementById("amount").value)
+            });
+
+            // Clear edit mode
+            delete form.dataset.editId;
+
+            form.reset();
+
+            document.getElementById("date").value =
+              new Date().toISOString().slice(0, 10);
+
+            document.getElementById("updatedBy").value =
+              username || "";
+
+            submit.innerHTML =
+              '<i class="bi bi-cloud-arrow-up"></i> Save all expenses';
+
+            alertMsg(
+              "Expense updated successfully."
+            );
+
+            await loadExisting();
+
+          } catch (error) {
+
+            alertMsg(
+              error.message,
+              "error"
+            );
+
+          } finally {
+
+            submit.disabled = false;
+          }
+
+          return;
+        }
+
+
+        // ============================================================
+        // SAVE NEW EXPENSES
+        // ============================================================
+
+        if (!pending.length) {
+
+          alertMsg(
+            "Add at least one expense before saving.",
+            "error"
+          );
+
+          return;
+        }
+
+        const submit =
+          document.getElementById("submitPending");
+
+        submit.disabled = true;
+
+        try {
+
+          for (const item of pending) {
+            await adminRequest("add", item);
+          }
+
+          const count =
+            pending.length;
+
+          pending = [];
+
+          renderPending();
+
+          alertMsg(
+            `${count} expense${count === 1 ? "" : "s"} saved successfully.`
+          );
+
+          await loadExisting();
+
+        } catch (error) {
+
+          alertMsg(
+            error.message,
+            "error"
+          );
+
+        } finally {
+
+          submit.disabled = false;
+        }
+      });
     document.getElementById("reloadAdmin").addEventListener("click", loadExisting); document.getElementById("logout").addEventListener("click", () => { sessionStorage.clear(); location.href = "/admin-login.html"; }); loadExisting();
   </script>
 </body>
