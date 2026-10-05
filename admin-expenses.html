@@ -29,6 +29,7 @@
           <div class="form-field"><label for="type">Expense category</label><div class="input-with-icon select-icon"><i class="bi bi-tags"></i><select id="type" required><option value="">Choose a category</option><option>Train Ticket</option><option>Petrol</option><option>Food</option><option>Hotel/Accommodation</option><option>Travel/Transport</option><option>Other</option></select></div></div>
           <div class="form-field"><label for="amount">Amount (₹)</label><div class="input-with-icon"><i class="bi bi-currency-rupee"></i><input id="amount" type="number" min="0.01" step="0.01" inputmode="decimal" placeholder="0.00" required></div></div>
           <div class="form-field"><label for="updatedBy">Paid / added by</label><div class="input-with-icon"><i class="bi bi-person-check"></i><input id="updatedBy" autocomplete="name" readonly required></div></div>
+          <div class="form-field"><label for="comments">Comments</label><div class="input-with-icon"><i class="bi bi-chat-left-text"></i><input id="comments" type="text" maxlength="500" placeholder="Optional comment"></div></div>
         </div>
         <div class="form-actions"><button class="expense-btn secondary" type="reset"><i class="bi bi-arrow-counterclockwise"></i> Clear</button><button class="expense-btn primary" type="submit"><i class="bi bi-plus-lg"></i> Add to save list</button><button class="expense-btn primary" id="submitPending" type="button"><i class="bi bi-cloud-arrow-up"></i> Save all expenses</button></div>
       </form>
@@ -36,13 +37,25 @@
     </section>
     <section class="expense-card mt-4">
       <div class="expense-toolbar"><div><h2 class="section-title">Existing expenses</h2><p class="section-subtitle">Newest records appear first. <span id="managementHint"></span></p></div><button id="reloadAdmin" class="expense-btn secondary" type="button"><i class="bi bi-arrow-clockwise"></i> Refresh</button></div>
-      <div class="expense-table-wrap"><table class="expense-table admin-table"><thead><tr><th>Date</th><th>Category</th><th>Amount</th><th>Added by</th><th>Updated</th><th class="admin-only">Actions</th></tr></thead><tbody id="adminRows"></tbody></table></div>
+      <div class="expense-table-wrap"><table class="expense-table admin-table"><thead><tr><th>Date</th><th>Category</th><th>Amount</th><th>Added by</th><th>Comments</th><th>Updated</th><th class="admin-only">Actions</th></tr></thead><tbody id="adminRows"></tbody></table></div>
     </section>
   </main>
+  <script src="/account-store.js"></script>
   <script>
     const EXPENSE_API_URL = "https://script.google.com/macros/s/AKfycbyYHi4Vzi4vbc90FfZ9UvlKlKIQuziVKtTBHzFOHYneqdk5ENsI_F0bKrY8yPw76xxV/exec";
-    const token = sessionStorage.getItem("tripAdminToken"); const username = sessionStorage.getItem("tripAdminUser"); const role = sessionStorage.getItem("tripUserRole") || "member"; const canManage = role === "admin"; const localAccount = sessionStorage.getItem("tripAccountSource") === "local";
+    const session = window.TripAccountStore?.readSession?.();
+    const token = session?.token;
+    const username = session?.user;
+    const role = session?.role || "member";
+    const canManage = role === "admin";
+    const localAccount = session?.source === "local";
     if (!token) location.replace("/admin-login.html");
+    window.addEventListener("pageshow", () => {
+      if (!window.TripAccountStore?.readSession?.()) {
+        window.TripAccountStore?.clearSession?.();
+        location.replace("/admin-login.html");
+      }
+    });
     document.getElementById("loggedUser").textContent = username || "Member"; document.getElementById("updatedBy").value = username || ""; document.getElementById("date").value = new Date().toISOString().slice(0, 10);
     document.getElementById("roleBadge").textContent = canManage ? "Administrator" : "Member"; document.getElementById("managementHint").textContent = canManage ? "You can edit or delete records." : "Member accounts can add new expense records.";
     if (!canManage) document.querySelectorAll(".admin-only").forEach(el => el.remove());
@@ -82,7 +95,7 @@
 
         return data;
       }
-    function renderPending() { const list = document.getElementById("pendingList"); list.innerHTML = pending.map((item, index) => `<div class="pending-item"><span><i class="bi bi-clock-history"></i> ${esc(item.date)} · ${esc(item.type)} · <strong>${money(item.amount)}</strong> · ${esc(item.updatedBy)}</span><button class="expense-btn danger small" data-remove="${index}" type="button"><i class="bi bi-x-lg"></i> Remove</button></div>`).join(""); list.querySelectorAll("[data-remove]").forEach(button => button.addEventListener("click", () => { pending.splice(Number(button.dataset.remove), 1); renderPending(); })); }
+    function renderPending() { const list = document.getElementById("pendingList"); list.innerHTML = pending.map((item, index) => `<div class="pending-item"><span><i class="bi bi-clock-history"></i> ${esc(item.date)} · ${esc(item.type)} · <strong>${money(item.amount)}</strong> · ${esc(item.updatedBy)}${item.comments ? ` · ${esc(item.comments)}` : ""}</span><button class="expense-btn danger small" data-remove="${index}" type="button"><i class="bi bi-x-lg"></i> Remove</button></div>`).join(""); list.querySelectorAll("[data-remove]").forEach(button => button.addEventListener("click", () => { pending.splice(Number(button.dataset.remove), 1); renderPending(); })); }
     function renderAdmin() {
         const body = document.getElementById("adminRows");
 
@@ -98,6 +111,7 @@
       <td><span class="expense-badge">${esc(item.type)}</span></td>
       <td class="expense-amount">${money(item.amount)}</td>
       <td>${esc(item.updatedBy)}</td>
+      <td>${esc(item.comments || "—")}</td>
       <td>${esc(item.updatedAt || "—")}</td>
 
       ${canManage ? `
@@ -122,7 +136,7 @@
     </tr>
   `).join("") || `
     <tr>
-      <td colspan="${canManage ? 6 : 5}" class="empty-cell">
+      <td colspan="${canManage ? 7 : 6}" class="empty-cell">
         No expenses have been recorded yet.
       </td>
     </tr>
@@ -197,6 +211,8 @@
             document.getElementById("updatedBy").value =
               username || "";
 
+            document.getElementById("comments").value =
+              item.comments || "";
 
             // Store the expense ID being edited
             document.getElementById("expenseForm").dataset.editId =
@@ -227,7 +243,7 @@
       }
     async function loadExisting() { try { document.getElementById("reloadAdmin").disabled = true; const data = await adminRequest("list"); existing = Array.isArray(data.expenses) ? data.expenses : []; renderAdmin(); } catch (error) { alertMsg(error.message, "error"); } finally { document.getElementById("reloadAdmin").disabled = false; } }
     const expenseForm = document.getElementById("expenseForm");
-    expenseForm.addEventListener("submit", event => { event.preventDefault(); const form = event.currentTarget; if (!form.reportValidity()) return; pending.push({ date: document.getElementById("date").value, type: document.getElementById("type").value, amount: Number(document.getElementById("amount").value), updatedBy: document.getElementById("updatedBy").value }); renderPending(); document.getElementById("amount").value = ""; document.getElementById("type").value = ""; alertMsg("Expense added to the save list. Save when you are ready."); });
+    expenseForm.addEventListener("submit", event => { event.preventDefault(); const form = event.currentTarget; if (!form.reportValidity()) return; pending.push({ date: document.getElementById("date").value, type: document.getElementById("type").value, amount: Number(document.getElementById("amount").value), updatedBy: document.getElementById("updatedBy").value, comments: document.getElementById("comments").value.trim() }); renderPending(); document.getElementById("amount").value = ""; document.getElementById("type").value = ""; document.getElementById("comments").value = ""; alertMsg("Expense added to the save list. Save when you are ready."); });
     expenseForm.addEventListener("reset", () => setTimeout(() => { document.getElementById("date").value = new Date().toISOString().slice(0, 10); document.getElementById("updatedBy").value = username || ""; }, 0));
     document.getElementById("submitPending").addEventListener("click", async () => {
 
@@ -253,7 +269,8 @@
               id: editId,
               date: document.getElementById("date").value,
               type: document.getElementById("type").value,
-              amount: Number(document.getElementById("amount").value)
+              amount: Number(document.getElementById("amount").value),
+              comments: document.getElementById("comments").value.trim()
             });
 
             // Clear edit mode
@@ -342,7 +359,28 @@
           submit.disabled = false;
         }
       });
-    document.getElementById("reloadAdmin").addEventListener("click", loadExisting); document.getElementById("logout").addEventListener("click", () => { sessionStorage.clear(); location.href = "/admin-login.html"; }); loadExisting();
+    document.getElementById("reloadAdmin").addEventListener("click", loadExisting);
+    document.getElementById("logout").addEventListener("click", () => {
+      window.TripAccountStore?.clearSession?.();
+      location.href = "/admin-login.html";
+    });
+
+    // Browser sessions expire after 10 minutes without activity.
+    // Android/Capacitor sessions intentionally do not expire automatically.
+    if (!window.TripAccountStore?.isAndroidApp?.()) {
+      const touch = () => window.TripAccountStore?.touchSession?.();
+      ["click", "keydown", "pointerdown", "touchstart", "scroll"].forEach(eventName => {
+        document.addEventListener(eventName, touch, { passive: true });
+      });
+      setInterval(() => {
+        if (!window.TripAccountStore?.readSession?.()) {
+          window.TripAccountStore?.clearSession?.();
+          location.replace("/admin-login.html");
+        }
+      }, 30000);
+    }
+
+    loadExisting();
   </script>
 </body>
 
