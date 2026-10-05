@@ -110,6 +110,15 @@
     </footer>
   </main>
 
+  <script src="account-store.js"></script>
+  <script>
+    // Browser: returning to Home ends the expense-management session.
+    // Android/Capacitor: keep the session until the user explicitly logs out.
+    if (!window.TripAccountStore?.isAndroidApp?.()) {
+      window.TripAccountStore?.clearSession?.();
+      window.addEventListener("pageshow", () => window.TripAccountStore?.clearSession?.());
+    }
+  </script>
   <script src="script.js"></script>
 </body>
 </html>

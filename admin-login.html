@@ -110,12 +110,16 @@
     }
     function escapeHtml(value) { return String(value ?? "").replace(/[&<>\"']/g, char => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '\"': "&quot;", "'": "&#039;" }[char])); }
     function startSession(data, source) {
-      const role = String(data.role || "member").toLowerCase() === "admin" ? "admin" : "member";
-      sessionStorage.setItem("tripAdminToken", data.token || data.id);
-      sessionStorage.setItem("tripAdminUser", data.name || data.username);
-      sessionStorage.setItem("tripUserRole", role);
-      sessionStorage.setItem("tripAccountSource", source);
-      sessionStorage.setItem("tripLoginMessage", role === "admin" ? "Administrator access granted. You can edit and delete expense records." : "This is a member account. Member-level access has been granted.");
+      const session = TripAccountStore.saveSession(data, source);
+      // Keep the existing login message behavior for the browser flow.
+      if (!TripAccountStore.isAndroidApp()) {
+        sessionStorage.setItem(
+          "tripLoginMessage",
+          session.role === "admin"
+            ? "Administrator access granted. You can edit and delete expense records."
+            : "This is a member account. Member-level access has been granted."
+        );
+      }
       location.href = "/admin-expenses.html";
     }
     document.getElementById("loginForm").addEventListener("submit", async event => {
