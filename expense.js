@@ -109,8 +109,8 @@ function renderExpenses(expenses, totalSavings = null) {
   }
   container.innerHTML = groupExpenses(expenses).map(([date, items]) => {
     const daily = items.reduce((sum, x) => sum + Number(x.amount || 0), 0);
-    const rows = items.map(x => `<tr><td><span class="expense-badge"><i class="bi ${categoryIcon(x.type)}"></i>${escapeHtml(x.type)}</span></td><td class="expense-amount">${money(x.amount)}</td><td>${escapeHtml(x.updatedBy || "—")}</td><td>${escapeHtml(x.updatedAt || "—")}</td></tr>`).join("");
-    return `<section class="expense-day"><div class="expense-day-head"><div><strong><i class="bi bi-calendar3"></i> ${escapeHtml(date)}</strong><span class="date-count">${items.length} ${items.length === 1 ? "entry" : "entries"}</span></div><span class="daily-total">${money(daily)}</span></div><div class="expense-table-wrap"><table class="expense-table"><thead><tr><th>Expense type</th><th>Amount</th><th>Added by</th><th>Updated</th></tr></thead><tbody>${rows}</tbody></table></div></section>`;
+    const rows = items.map(x => `<tr><td><span class="expense-badge"><i class="bi ${categoryIcon(x.type)}"></i>${escapeHtml(x.type)}</span></td><td class="expense-amount">${money(x.amount)}</td><td>${escapeHtml(x.updatedBy || "—")}</td><td>${escapeHtml(x.comments || "")}</td><td>${escapeHtml(x.updatedAt || "—")}</td></tr>`).join("");
+    return `<section class="expense-day"><div class="expense-day-head"><div><strong><i class="bi bi-calendar3"></i> ${escapeHtml(date)}</strong><span class="date-count">${items.length} ${items.length === 1 ? "entry" : "entries"}</span></div><span class="daily-total">${money(daily)}</span></div><div class="expense-table-wrap"><table class="expense-table"><thead><tr><th>Expense type</th><th>Amount</th><th>Added by</th><th>Comments</th><th>Updated</th></tr></thead><tbody>${rows}</tbody></table></div></section>`;
   }).join("");
   setSavingsSummary(expenses, totalSavings);
   renderCategoryBreakdown(expenses);
@@ -147,7 +147,7 @@ document.addEventListener("DOMContentLoaded", () => {
   refresh.addEventListener("click", () => refreshData(true));
   search.addEventListener("input", () => {
     const query = search.value.trim().toLowerCase();
-    renderExpenses(allExpenses.filter(item => [item.date, item.type, item.updatedBy].join(" ").toLowerCase().includes(query)), totalSavings);
+    renderExpenses(allExpenses.filter(item => [item.date, item.type, item.updatedBy, item.comments].join(" ").toLowerCase().includes(query)), totalSavings);
   });
   refreshData();
 });
