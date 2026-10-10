@@ -38,36 +38,15 @@ function showError(message) {
   el.style.display = "block";
 }
 
-function getSession() {
-  const store = window.TripAccountStore;
-
-  const session =
-    store && typeof store.readSession === "function"
-      ? store.readSession()
-      : null;
-
-  if (!session || !session.token) {
-    window.location.replace("/admin-login.html");
-    return null;
-  }
-
-  if (typeof store.touchSession === "function") {
-    store.touchSession();
-  }
-
-  return session;
-}
-
-async function fetchExpenses(token) {
+async function fetchExpenses() {
   if (!API_URL) {
     throw new Error("Expense API URL is not configured.");
   }
 
   const url = new URL(API_URL);
-
   url.searchParams.set("action", "list");
-  url.searchParams.set("token", token);
 
+  // No login token is sent by this page.
   const response = await fetch(url.toString(), {
     cache: "no-store"
   });
@@ -87,8 +66,6 @@ async function fetchExpenses(token) {
     : [];
 }
 
-// Existing backend stores the submitter's display name
-// in the "Updated By" column.
 function expenseOwner(item) {
   return String(item.updatedBy || "").trim() || "Unknown user";
 }
@@ -253,14 +230,7 @@ function render(expenses) {
 }
 
 async function refresh() {
-  const session = getSession();
-
-  if (!session) {
-    return;
-  }
-
   const button = byId("refreshButton");
-
   button.disabled = true;
 
   byId("dateGroups").innerHTML =
@@ -269,14 +239,11 @@ async function refresh() {
   byId("pageAlert").style.display = "none";
 
   try {
-    // Intentionally show all users, not just the logged-in user.
-    const allExpenses = await fetchExpenses(session.token);
-
+    const allExpenses = await fetchExpenses();
     render(allExpenses);
 
   } catch (error) {
     byId("dateGroups").innerHTML = "";
-
     showError(error.message || "Unable to load expenses.");
 
   } finally {
@@ -285,14 +252,7 @@ async function refresh() {
 }
 
 document.addEventListener("DOMContentLoaded", () => {
-
   byId("refreshButton").addEventListener("click", refresh);
-
-  byId("logoutButton").addEventListener("click", () => {
-    window.TripAccountStore?.clearSession?.();
-    window.location.replace("/admin-login.html");
-  });
-
   refresh();
 });
 
