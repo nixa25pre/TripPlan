@@ -12,8 +12,6 @@
 <style>
 :root {
   color-scheme: dark;
-  --bg: #07172d;
-  --panel: #102744;
   --line: #29425f;
   --muted: #a9bed5;
   --cyan: #45d1df;
@@ -226,6 +224,7 @@ th:last-child {
     </a>
 
     <p class="eyebrow">TripPlan · Expense Report</p>
+
     <h1>User-wise expenses</h1>
 
     <p id="userSubtitle">
@@ -233,13 +232,9 @@ th:last-child {
     </p>
   </div>
 
-  <div style="display:flex;gap:10px;flex-wrap:wrap">
-    <button class="btn" id="refreshButton" type="button">
+  <div>
+    <button class="btn primary" id="refreshButton" type="button">
       <i class="bi bi-arrow-clockwise"></i> Refresh
-    </button>
-
-    <button class="btn primary" id="logoutButton" type="button">
-      <i class="bi bi-box-arrow-right"></i> Logout
     </button>
   </div>
 </header>
@@ -247,6 +242,7 @@ th:last-child {
 <div id="pageAlert" class="alert" role="alert"></div>
 
 <section class="summary">
+
   <article class="metric">
     <div class="label">Users with expenses</div>
     <div id="userName" class="value">0</div>
@@ -261,6 +257,7 @@ th:last-child {
     <div class="label">Total expenses</div>
     <div id="userTotal" class="value">₹0</div>
   </article>
+
 </section>
 
 <section id="dateGroups" aria-live="polite">
@@ -273,13 +270,11 @@ th:last-child {
 </section>
 
 <p style="font-size:.8rem">
-  All users are shown separately. Data is loaded from the existing
-  Expenses sheet. Use Refresh to fetch the latest records.
+  Public view: anyone who has this page URL can view the expense records.
+  Use Refresh to fetch the latest records.
 </p>
 
 </main>
-
-<script src="/account-store.js"></script>
 
 <script>
 window.EXPENSE_API_URL =
